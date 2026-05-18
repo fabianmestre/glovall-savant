@@ -40,9 +40,21 @@ export default function App() {
   const [scanActive, setScanActive] = useState(false);
   const [reportData, setReportData] = useState<string | null>(null);
   const [formattedReport, setFormattedReport] = useState<string | null>(null);
+  const [generationTime, setGenerationTime] = useState<string>("");
 
   useEffect(() => {
     if (reportData) {
+      // Set generation time if not already set for this report
+      if (!generationTime) {
+        setGenerationTime(new Date().toLocaleString('es-ES', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }));
+      }
+
       let content = "";
       let parsed: any = null;
       
@@ -311,6 +323,7 @@ export default function App() {
     setScanActive(true);
     setReportData(null);
     setFormattedReport("");
+    setGenerationTime("");
     
     const playerToSend = searchPlayer.trim();
     setPrevTab(activeTab);
@@ -366,6 +379,7 @@ export default function App() {
     setLoading(true);
     setReportData(null);
     setFormattedReport("");
+    setGenerationTime("");
 
     const playerToSend = analysisPlayer.trim();
     const reportToSend = displayReportName(selectedReport);
@@ -426,6 +440,7 @@ export default function App() {
     setLoading(true);
     setReportData(null);
     setFormattedReport("");
+    setGenerationTime("");
     
     // Switch to viewer immediately to show loader
     setPrevTab(activeTab);
@@ -1063,7 +1078,7 @@ export default function App() {
                   </div>
                   <div>
                     <h3 className="text-[10px] text-slate-400 font-bold uppercase tracking-[2px]">
-                      Inteligencia MLB • Datos actualizados al 17 de mayo de 2026
+                      Inteligencia MLB • Reporte generado: {generationTime}
                     </h3>
                   </div>
                 </div>
