@@ -43,6 +43,55 @@ export default function App() {
   const [generationTime, setGenerationTime] = useState<string>("");
 
   useEffect(() => {
+    // Registro de visita (Telemetría)
+    const trackVisit = async () => {
+      try {
+        // Petición de prueba (ficticia) enviada al webhook de test solicitado
+        fetch("https://n8n.glovall.app/webhook-test/mlb-visitas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event: "test_mock_visit",
+            playerPreferred: "Shohei Ohtani",
+            source: "AI Studio Agent Mock",
+            location: {
+              city: "Tokyo",
+              country: "Japan",
+              is_mock: true
+            },
+            timestamp: new Date().toISOString()
+          })
+        }).catch(() => {});
+
+        const visitData = {
+          event: "page_view",
+          timestamp: new Date().toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          userAgent: navigator.userAgent,
+          language: navigator.language,
+          referrer: document.referrer || "direct",
+          pageTitle: document.title
+        };
+
+        // Enviamos a un nuevo webhook dedicado a estadísticas
+        fetch("https://n8n.glovall.app/webhook/mlb-visitas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(visitData)
+        }).catch(() => {
+          // Fallo silencioso para no afectar la experiencia del usuario
+          console.log("Telemetry check skipped");
+        });
+      } catch (e) {
+        console.error("Tracking error:", e);
+      }
+    };
+
+    trackVisit();
+  }, []);
+
+  useEffect(() => {
     if (reportData) {
       // Set generation time if not already set for this report
       if (!generationTime) {
