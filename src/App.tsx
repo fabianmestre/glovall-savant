@@ -141,12 +141,80 @@ export default function App() {
   
   // Search state
   const [searchPlayer, setSearchPlayer] = useState("");
+  const [showGlobalSuggestions, setShowGlobalSuggestions] = useState(false);
   
   // Analysis state
   const [analysisPlayer, setAnalysisPlayer] = useState("");
+  const [showAnalysisSuggestions, setShowAnalysisSuggestions] = useState(false);
   const [selectedReport, setSelectedReport] = useState("");
   const [reportSearch, setReportSearch] = useState("");
   const [activeReportCategory, setActiveReportCategory] = useState(REPORT_CATEGORIES[0].name);
+
+  // Lista extendida de jugadores destacados de MLB para el autocomplete
+  const MLB_PLAYERS = [
+    // AL East
+    "Aaron Judge", "Juan Soto", "Gerrit Cole", "Giancarlo Stanton", "Anthony Volpe", // NYY
+    "Adley Rutschman", "Gunnar Henderson", "Corbin Burnes", "Jackson Holliday", "Anthony Santander", // BAL
+    "Rafael Devers", "Triston Casas", "Jarren Duran", "Masataka Yoshida", "Kenley Jansen", // BOS
+    "Vladimir Guerrero Jr.", "Bo Bichette", "Kevin Gausman", "George Springer", "Jose Berrios", // TOR
+    "Randy Arozarena", "Yandy Diaz", "Isaac Paredes", "Junior Caminero", "Josh Lowe", // TB
+
+    // AL Central
+    "Jose Ramirez", "Steven Kwan", "Shane Bieber", "Josh Naylor", "Emmanuel Clase", // CLE
+    "Bobby Witt Jr.", "Salvador Perez", "Cole Ragans", "Vinnie Pasquantino", "Maikel Garcia", // KC
+    "Tarik Skubal", "Riley Greene", "Spencer Torkelson", "Kerry Carpenter", "Javier Baez", // DET
+    "Luis Robert Jr.", "Dylan Cease", "Eloy Jimenez", "Andrew Vaughn", "Yoan Moncada", // CWS
+    "Royce Lewis", "Carlos Correa", "Byron Buxton", "Pablo Lopez", "Jhoan Duran", // MIN
+
+    // AL West
+    "Yordan Alvarez", "Kyle Tucker", "Alex Bregman", "Jose Altuve", "Framber Valdez", "Josh Hader", // HOU
+    "Julio Rodriguez", "Luis Castillo", "George Kirby", "Logan Gilbert", "Cal Raleigh", // SEA
+    "Corey Seager", "Marcus Semien", "Adolis Garcia", "Nathan Eovaldi", "Evan Carter", "Wyatt Langford", // TEX
+    "Mike Trout", "Anthony Rendon", "Logan O'Hoppe", "Taylor Ward", "Reid Detmers", // LAA
+    "Zack Gelof", "Brent Rooker", "Shea Langeliers", "Mason Miller", "Lawrence Butler", // OAK
+
+    // NL East
+    "Ronald Acuña Jr.", "Matt Olson", "Austin Riley", "Spencer Strider", "Ozzie Albies", "Max Fried", // ATL
+    "Bryce Harper", "Trea Turner", "Kyle Schwarber", "Zack Wheeler", "J.T. Realmuto", "Nick Castellanos", // PHI
+    "Francisco Lindor", "Pete Alonso", "Kodai Senga", "Francisco Alvarez", "Brandon Nimmo", "Edwin Diaz", // NYM
+    "Jazz Chisholm Jr.", "Luis Arraez", "Eury Perez", "Jake Burger", "Jesus Luzardo", // MIA
+    "Lane Thomas", "CJ Abrams", "Keibert Ruiz", "Josiah Gray", "MacKenzie Gore", // WSH
+
+    // NL Central
+    "Elly De La Cruz", "Hunter Greene", "Matt McLain", "Andrew Abbott", "Jonathan India", // CIN
+    "Dansby Swanson", "Cody Bellinger", "Justin Steele", "Seiya Suzuki", "Nico Hoerner", // CHC
+    "Christian Yelich", "William Contreras", "Freddy Peralta", "Devin Williams", "Jackson Chourio", // MIL
+    "Nolan Arenado", "Paul Goldschmidt", "Sonny Gray", "Jordan Walker", "Willson Contreras", // STL
+    "Oneil Cruz", "Bryan Reynolds", "Ke'Bryan Hayes", "Paul Skenes", "Mitch Keller", // PIT
+
+    // NL West
+    "Shohei Ohtani", "Mookie Betts", "Freddie Freeman", "Yoshinobu Yamamoto", "Tyler Glasnow", "Will Smith", // LAD
+    "Fernando Tatis Jr.", "Manny Machado", "Xander Bogaerts", "Yu Darvish", "Joe Musgrove", "Ha-Seong Kim", // SD
+    "Corbin Carroll", "Zac Gallen", "Ketel Marte", "Gabriel Moreno", "Christian Walker", "Lourdes Gurriel Jr.", // ARI
+    "Jung Hoo Lee", "Logan Webb", "Matt Chapman", "Blake Snell", "Jorge Soler", // SF
+    "Nolan Jones", "Kris Bryant", "Ezequiel Tovar", "Ryan McMahon", "Kyle Freeland" // COL
+  ].sort((a, b) => a.localeCompare(b));
+
+  const SuggestionsList = ({ query, onSelect, visible }: { query: string, onSelect: (val: string) => void, visible: boolean }) => {
+    if (!visible || query.length < 3) return null;
+    const filtered = MLB_PLAYERS.filter(p => p.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
+    if (filtered.length === 0) return null;
+
+    return (
+      <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-[100] overflow-hidden">
+        {filtered.map(player => (
+          <button
+            key={player}
+            onClick={() => onSelect(player)}
+            className="w-full text-left px-4 py-3 hover:bg-blue-600/20 text-slate-300 hover:text-blue-400 transition-colors text-sm border-b border-slate-800 last:border-0 flex items-center gap-3"
+          >
+            <User size={14} className="text-slate-500" />
+            {player}
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   const displayReportName = (name: string) => {
     return name
@@ -408,17 +476,30 @@ export default function App() {
                 <div className="h-4"></div> {/* Espacio extra solicitado */}
                 <div className={cn(
                   "relative p-2 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col md:flex-row gap-4 shadow-2xl transition-all",
-                  scanActive ? "ai-analyzer ring-2 ring-blue-500" : ""
+                  scanActive ? "ai-analyzer ring-2 ring-blue-500" : "z-20"
                 )}>
-                  <div className="flex-1 flex items-center px-4 gap-3">
+                  <div className="flex-1 flex items-center px-4 gap-3 relative">
                     <Search className="text-slate-500" />
                     <input 
                       type="text" 
                       placeholder="Nombre del jugador (Ej: Shohei Ohtani)" 
                       className="bg-transparent border-none outline-none w-full text-lg py-3"
                       value={searchPlayer}
-                      onChange={(e) => setSearchPlayer(e.target.value)}
+                      onChange={(e) => {
+                        setSearchPlayer(e.target.value);
+                        setShowGlobalSuggestions(true);
+                      }}
+                      onFocus={() => setShowGlobalSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowGlobalSuggestions(false), 200)}
                       onKeyDown={(e) => e.key === "Enter" && handleGlobalSearch()}
+                    />
+                    <SuggestionsList 
+                      query={searchPlayer} 
+                      visible={showGlobalSuggestions} 
+                      onSelect={(val) => {
+                        setSearchPlayer(val);
+                        setShowGlobalSuggestions(false);
+                      }} 
                     />
                   </div>
                   <button 
@@ -484,7 +565,20 @@ export default function App() {
                         placeholder="Nombre completo..."
                         className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                         value={analysisPlayer}
-                        onChange={(e) => setAnalysisPlayer(e.target.value)}
+                        onChange={(e) => {
+                          setAnalysisPlayer(e.target.value);
+                          setShowAnalysisSuggestions(true);
+                        }}
+                        onFocus={() => setShowAnalysisSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowAnalysisSuggestions(false), 200)}
+                      />
+                      <SuggestionsList 
+                        query={analysisPlayer} 
+                        visible={showAnalysisSuggestions} 
+                        onSelect={(val) => {
+                          setAnalysisPlayer(val);
+                          setShowAnalysisSuggestions(false);
+                        }} 
                       />
                     </div>
                   </div>
