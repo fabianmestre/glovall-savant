@@ -150,50 +150,99 @@ export default function App() {
   const [reportSearch, setReportSearch] = useState("");
   const [activeReportCategory, setActiveReportCategory] = useState(REPORT_CATEGORIES[0].name);
 
-  // Lista extendida de jugadores destacados de MLB para el autocomplete
-  const MLB_PLAYERS = [
-    // AL East
-    "Aaron Judge", "Juan Soto", "Gerrit Cole", "Giancarlo Stanton", "Anthony Volpe", // NYY
-    "Adley Rutschman", "Gunnar Henderson", "Corbin Burnes", "Jackson Holliday", "Anthony Santander", // BAL
-    "Rafael Devers", "Triston Casas", "Jarren Duran", "Masataka Yoshida", "Kenley Jansen", // BOS
-    "Vladimir Guerrero Jr.", "Bo Bichette", "Kevin Gausman", "George Springer", "Jose Berrios", // TOR
-    "Randy Arozarena", "Yandy Diaz", "Isaac Paredes", "Junior Caminero", "Josh Lowe", // TB
-
-    // AL Central
-    "Jose Ramirez", "Steven Kwan", "Shane Bieber", "Josh Naylor", "Emmanuel Clase", // CLE
-    "Bobby Witt Jr.", "Salvador Perez", "Cole Ragans", "Vinnie Pasquantino", "Maikel Garcia", // KC
-    "Tarik Skubal", "Riley Greene", "Spencer Torkelson", "Kerry Carpenter", "Javier Baez", // DET
-    "Luis Robert Jr.", "Dylan Cease", "Eloy Jimenez", "Andrew Vaughn", "Yoan Moncada", // CWS
-    "Royce Lewis", "Carlos Correa", "Byron Buxton", "Pablo Lopez", "Jhoan Duran", // MIN
-
-    // AL West
-    "Yordan Alvarez", "Kyle Tucker", "Alex Bregman", "Jose Altuve", "Framber Valdez", "Josh Hader", // HOU
-    "Julio Rodriguez", "Luis Castillo", "George Kirby", "Logan Gilbert", "Cal Raleigh", // SEA
-    "Corey Seager", "Marcus Semien", "Adolis Garcia", "Nathan Eovaldi", "Evan Carter", "Wyatt Langford", // TEX
-    "Mike Trout", "Anthony Rendon", "Logan O'Hoppe", "Taylor Ward", "Reid Detmers", // LAA
-    "Zack Gelof", "Brent Rooker", "Shea Langeliers", "Mason Miller", "Lawrence Butler", // OAK
-
-    // NL East
-    "Ronald Acuña Jr.", "Matt Olson", "Austin Riley", "Spencer Strider", "Ozzie Albies", "Max Fried", // ATL
-    "Bryce Harper", "Trea Turner", "Kyle Schwarber", "Zack Wheeler", "J.T. Realmuto", "Nick Castellanos", // PHI
-    "Francisco Lindor", "Pete Alonso", "Kodai Senga", "Francisco Alvarez", "Brandon Nimmo", "Edwin Diaz", // NYM
-    "Jazz Chisholm Jr.", "Luis Arraez", "Eury Perez", "Jake Burger", "Jesus Luzardo", // MIA
-    "Lane Thomas", "CJ Abrams", "Keibert Ruiz", "Josiah Gray", "MacKenzie Gore", // WSH
-
-    // NL Central
-    "Elly De La Cruz", "Hunter Greene", "Matt McLain", "Andrew Abbott", "Jonathan India", // CIN
-    "Dansby Swanson", "Cody Bellinger", "Justin Steele", "Seiya Suzuki", "Nico Hoerner", // CHC
-    "Christian Yelich", "William Contreras", "Freddy Peralta", "Devin Williams", "Jackson Chourio", // MIL
-    "Nolan Arenado", "Paul Goldschmidt", "Sonny Gray", "Jordan Walker", "Willson Contreras", // STL
-    "Oneil Cruz", "Bryan Reynolds", "Ke'Bryan Hayes", "Paul Skenes", "Mitch Keller", // PIT
-
-    // NL West
-    "Shohei Ohtani", "Mookie Betts", "Freddie Freeman", "Yoshinobu Yamamoto", "Tyler Glasnow", "Will Smith", // LAD
-    "Fernando Tatis Jr.", "Manny Machado", "Xander Bogaerts", "Yu Darvish", "Joe Musgrove", "Ha-Seong Kim", // SD
-    "Corbin Carroll", "Zac Gallen", "Ketel Marte", "Gabriel Moreno", "Christian Walker", "Lourdes Gurriel Jr.", // ARI
-    "Jung Hoo Lee", "Logan Webb", "Matt Chapman", "Blake Snell", "Jorge Soler", // SF
-    "Nolan Jones", "Kris Bryant", "Ezequiel Tovar", "Ryan McMahon", "Kyle Freeland" // COL
-  ].sort((a, b) => a.localeCompare(b));
+  // Lista completa de jugadores de MLB para el autocomplete (formato: Apellido, Nombre)
+  const MLB_PLAYERS = Array.from(new Set([
+    "Abrams, CJ", "Abreu, Wilyer", "Acuna Jr., Ronald", "Acuna, Luisangel", "Adames, Willy",
+    "Adell, Jo", "Albies, Ozzie", "Alexander, Blaze", "Allen, Nick", "Alonso, Pete",
+    "Altuve, Jose", "Alvarez, Francisco", "Alvarez, Yordan", "Amaya, Miguel", "Anderson, Drew",
+    "Andujar, Miguel", "Anthony, Roman", "Antonacci, Sam", "Aranda, Jonathan", "Arenado, Nolan",
+    "Arias, Gabriel", "Arraez, Luis", "Arozarena, Randy", "Arroyo, Edwin", "Ashcraft, Braxton",
+    "Bader, Harrison", "Baez, Javier", "Bailey, Patrick", "Baldwin, Drake", "Ballesteros, Moises",
+    "Barger, Addison", "Barrosa, Jorge", "Bart, Joey", "Basallo, Samuel", "Baty, Brett",
+    "Bauers, Jake", "Bazzana, Travis", "Beavers, Dylan", "Beck, Jordan", "Bell, Josh",
+    "Bellinger, Cody", "Benge, Carson", "Benintendi, Andrew", "Benson, Will", "Berrios, Jose",
+    "Betts, Mookie", "Bichette, Bo", "Bieber, Shane", "Black, Tyler", "Bleday, JJ",
+    "Bogaerts, Xander", "Bohm, Alec", "Bregman, Alex", "Brito, Juan", "Burleson, Alec",
+    "Burnes, Corbin", "Busch, Michael", "Butler, Lawrence", "Buxton, Byron", "Caballero, Jose",
+    "Caglianone, Jac", "Caissie, Owen", "Call, Alex", "Caminero, Junior", "Campusano, Luis",
+    "Candelario, Jeimer", "Canzone, Dominic", "Caratini, Victor", "Carpenter, Kerry", "Carroll, Corbin",
+    "Carter, Evan", "Castellanos, Nick", "Castillo, Luis", "Castro, Willi", "Cease, Dylan",
+    "Chapman, Matt", "Chisholm Jr., Jazz", "Chourio, Jackson", "Church, Nathan", "Clarke, Denzel",
+    "Clement, Ernie", "Clemens, Kody", "Cole, Gerrit", "Cole, Zach", "Collins, Isaac",
+    "Conforto, Michael", "Conine, Griffin", "Contreras, William", "Contreras, Willson", "Cook, Billy",
+    "Correa, Carlos", "Cortes, Carlos", "Cowser, Colton", "Crawford, J.P.", "Crawford, Justin",
+    "Cronenworth, Jake", "Crow-Armstrong, Pete", "Cruz, Oneil", "d'Arnaud, Travis", "Davis, Henry",
+    "De La Cruz, Elly", "Del Castillo, Adrian", "DeLauter, Chase", "DeLuca, Jonny", "Devers, Rafael",
+    "Dezenzo, Zach", "Diaz, Elias", "Diaz, Yainer", "Diaz, Yandy", "Dingler, Dillon",
+    "Dominguez, Jasson", "Donovan, Brendan", "Doyle, Brenton", "Dubon, Mauricio", "Dunn, Blake",
+    "Durbin, Caleb", "Duran, Ezequiel", "Duran, Jarren", "Duran, Jhoan", "Edwards, Xavier",
+    "Encarnacion, Jerar", "Escarra, J.C.", "Espinal, Santiago", "Eykhoff, Nathan", "Feduccia, Hunter",
+    "Fermin, Freddy", "Fermin, Jose", "Fernandez, Jose", "Flaherty, Jack", "Fortes, Nick",
+    "Fraley, Jake", "France, Ty", "Frazier, Adam", "Freeland, Alex", "Freeman, Freddie",
+    "Freeman, Tyler", "Frelick, Sal", "Fried, Max", "Friedl, TJ", "Fry, David",
+    "Gallen, Zac", "Garcia Jr., Luis", "Garcia, Adolis", "Garcia, Maikel", "Garver, Mitch",
+    "Gasper, Mickey", "Gelof, Zack", "Gilbert, Drew", "Gilbert, Logan", "Gimenez, Andres",
+    "Glasnow, Tyler", "Goldschmidt, Paul", "Gonzales, Nick", "Goodman, Hunter", "Gorman, Nolan",
+    "Gray, Sonny", "Gray, Tristan", "Greene, Hunter", "Greene, Riley", "Grichuk, Randal",
+    "Griffin, Konnor", "Grisham, Trent", "Grissom, Vaughn", "Guerrero Jr., Vladimir", "Gurriel Jr., Lourdes",
+    "Haggerty, Sam", "Hamilton, David", "Happ, Ian", "Harper, Bryce", "Harris II, Michael",
+    "Harris, Dustin", "Hayes, Ke'Bryan", "Hays, Austin", "Hedges, Austin", "Heim, Jonah",
+    "Heineman, Tyler", "Henderson, Gunnar", "Hernaiz, Darell", "Hernandez, Heriberto", "Hernandez, Teoscar",
+    "Herrera, Ivan", "Hicks, Liam", "Higashioka, Kyle", "Hill, Derek", "Hinds, Rece",
+    "Hoerner, Nico", "Holliday, Jackson", "Horwitz, Spencer", "Hoskins, Rhys", "House, Brady",
+    "India, Jonathan", "Isbel, Kyle", "Jackson, Jeremiah", "Jansen, Danny", "Jeffers, Ryan",
+    "Jensen, Carter", "Jimenez, Eloy", "Jimenez, Leo", "Joe, Connor", "Johnston, Troy",
+    "Judge, Aaron", "Julien, Edouard", "Jung, Josh", "Karros, Kyle", "Keaschall, Luke",
+    "Keith, Colt", "Kelenic, Jarred", "Kelly, Carson", "Kelly, Merrill", "Kemp, Otto",
+    "Kim, Ha-Seong", "Kim, Hyeseong", "Kiner-Falefa, Isiah", "Kirk, Alejandro", "Kwan, Steven",
+    "Langeliers, Shea", "Langford, Wyatt", "Larnach, Trevor", "Laureano, Ramon", "Lee, Brooks",
+    "Lee, Hao-Yu", "Lee, Jung Hoo", "Lewis, Royce", "Lile, Daylen", "Lindor, Francisco",
+    "Lockridge, Brandon", "Loftin, Nick", "Loperfido, Joey", "Lopez, Otto", "Lowe, Brandon",
+    "Lowe, Josh", "Lowe, Nathaniel", "Lukes, Nathan", "Luzardo, Jesus", "Machado, Manny",
+    "Mack, Joe", "Manzardo, Kyle", "Marchan, Rafael", "Marsee, Jakob", "Marsh, Brandon",
+    "Marte, Ketel", "Marte, Noelvi", "Marte, Starling", "Martin, Austin", "Martinez, Angel",
+    "Massey, Michael", "Mateo, Jorge", "Matthews, Brice", "Mayer, Marcelo", "Mayo, Coby",
+    "McCann, James", "McCarthy, Jake", "McCutchen, Andrew", "McGonigle, Kevin", "McKinstry, Zach",
+    "McLain, Matt", "McMahon, Ryan", "McNeil, Jeff", "Mead, Curtis", "Meadows, Parker",
+    "Meidroth, Chase", "Melendez, MJ", "Merrill, Jackson", "Meyers, Jake", "Millas, Drew",
+    "Mitchell, Garrett", "Monasterio, Andruw", "Moncada, Yoan", "Moniak, Mickey", "Montgomery, Colson",
+    "Morel, Christopher", "Moreno, Gabriel", "Mullins, Cedric", "Muncy, Max", "Murakami, Munetaka",
+    "Murray, Tanner", "Myers, Dane", "Narvaez, Carlos", "Naylor, Bo", "Naylor, Josh",
+    "Neto, Zach", "Nimmo, Brandon", "Nola, Aaron", "Norby, Connor", "Nunez, Nasim",
+    "O'Hearn, Ryan", "O'Hoppe, Logan", "O'Neill, Tyler", "Ohtani, Shohei", "Okamoto, Kazuma",
+    "Olson, Matt", "Ortiz, Joey", "Osuna, Alejandro", "Outman, James", "Ozuna, Marcell",
+    "Pages, Andy", "Pages, Pedro", "Palacios, Richie", "Paredes, Isaac", "Pasquantino, Vinnie",
+    "Pauley, Graham", "Pederson, Joc", "Pena, Jeremy", "Peraza, Oswald", "Perdomo, Geraldo",
+    "Pereira, Everson", "Perez, Salvador", "Perez, Wenceel", "Peters, Tristan", "Pinango, Yohendrick",
+    "Polanco, Jorge", "Pozo, Yohel", "Quero, Edgar", "Rafaela, Ceddanne", "Raleigh, Cal",
+    "Raley, Luke", "Ramirez, Agustin", "Ramirez, Jose", "Ramos, Heliot", "Realmuto, J.T.",
+    "Refsnyder, Rob", "Rengifo, Luis", "Reyes, Felix", "Reynolds, Bryan", "Rice, Ben",
+    "Riley, Austin", "Rivas, Leo", "Rivero, Sebastian", "Robert Jr., Luis", "Rocchio, Brayan",
+    "Rodriguez, Jesus", "Rodriguez, Julio", "Rogers, Jake", "Rojas, Miguel", "Romo, Drew",
+    "Rooker, Brent", "Rosario, Amed", "Rumfield, TJ", "Rushing, Dalton", "Rutschman, Adley",
+    "Saggese, Thomas", "Sanchez, Gary", "Sanchez, Jesus", "Sanoja, Javier", "Santana, Carlos",
+    "Schanuel, Nolan", "Schmitt, Casey", "Schneemann, Daniel", "Schneider, Davis", "Schuemann, Max",
+    "Schwarber, Kyle", "Scott II, Victor", "Seager, Corey", "Semien, Marcus", "Senga, Kodai",
+    "Shaw, Matt", "Sheets, Gavin", "Shewmake, Braden", "Simpson, Chandler", "Slater, Austin",
+    "Smith, Cam", "Smith, Dominic", "Smith, Josh", "Smith, Will", "Soderstrom, Tyler",
+    "Soler, Jorge", "Song, Sung-Mun", "Sosa, Edmundo", "Sosa, Lenyn", "Soto, Juan",
+    "Springer, George", "Stanton, Giancarlo", "Steer, Spencer", "Stephenson, Tyler", "Stewart, Sal",
+    "Story, Trevor", "Stott, Bryson", "Stowers, Kyle", "Straw, Myles", "Stubbs, Garrett",
+    "Sullivan, Brett", "Susac, Daniel", "Suzuki, Seiya", "Swanson, Dansby", "Tatis Jr., Fernando",
+    "Taveras, Leody", "Tawa, Tim", "Taylor, Tyrone", "Taylor, Taylor", "Tena, Jose",
+    "Teodosio, Bryce", "Thomas, Alek", "Thomas, Colby", "Thomas, Lane", "Torkelson, Spencer",
+    "Torrens, Luis", "Torres, Gleyber", "Tovar, Ezequiel", "Trammell, Taylor", "Trevino, Jose",
+    "Triolo, Jared", "Trout, Mike", "Tucker, Kyle", "Turang, Brice", "Turner, Trea",
+    "Urias, Ramon", "Valdez, Framber", "Valenzuela, Brandon", "Valera, George", "Vargas, Ildemaro",
+    "Vargas, Miguel", "Varsho, Daulton", "Vaughn, Andrew", "Vazquez, Christian", "Vierling, Matt",
+    "Vientos, Mark", "Vivas, Jorbit", "Volpe, Anthony", "Wacha, Michael", "Waldschmidt, Ryan",
+    "Walker, Christian", "Walker, Jordan", "Wallner, Matt", "Walls, Taylor", "Ward, Taylor",
+    "Webb, Logan", "Wells, Austin", "Wetherholt, JJ", "Wheeler, Zack", "White, Eli",
+    "Wiemer, Joey", "Williamson, Ben", "Wilson, Jacob", "Wilson, Weston", "Winn, Masyn",
+    "Witt Jr., Bobby", "Wong, Connor", "Wood, James", "Wynns, Austin", "Yamamoto, Yoshinobu",
+    "Yastrzemski, Mike", "Yelich, Christian", "Yorke, Nick", "Young, Cole", "Young, Jacob",
+    "Young, Jared", "Yoshida, Masataka"
+  ])).sort((a, b) => a.localeCompare(b));
 
   const SuggestionsList = ({ query, onSelect, visible }: { query: string, onSelect: (val: string) => void, visible: boolean }) => {
     if (!visible || query.length < 3) return null;
@@ -263,22 +312,47 @@ export default function App() {
     setReportData(null);
     setFormattedReport("");
     
-    // Switch to viewer immediately to show loader
+    const playerToSend = searchPlayer.trim();
     setPrevTab(activeTab);
     setActiveTab("viewer");
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 125000); // 125 segundos (2 min + margen) para procesos pesados de IA
+
     try {
+      console.log("Iniciando Reporte Integral para:", playerToSend);
       const response = await fetch("https://n8n.glovall.app/webhook/reporte-integral", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerName: searchPlayer })
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json, text/plain, */*"
+        },
+        body: JSON.stringify({ playerName: playerToSend }),
+        signal: controller.signal
       });
+
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+      
       const data = await response.text();
+      if (!data) throw new Error("Respuesta vacía del servidor");
       setReportData(data);
-    } catch (error) {
-      Swal.fire("Error de Conexión", "No se pudo conectar con el servidor de análisis.", "error");
+    } catch (error: any) {
+      console.error("Search error:", error);
+      const message = error.name === 'AbortError' 
+        ? "El análisis está tardando más de lo esperado debido a la alta demanda. Por favor, revisa tu conexión e intenta de nuevo."
+        : "No se pudo conectar con el servidor de Glovall. Verifica que el jugador sea correcto o intenta más tarde.";
+      
+      Swal.fire({
+        title: "Error de Análisis",
+        text: message,
+        icon: "error",
+        confirmButtonColor: "#3b82f6"
+      });
       setActiveTab(prevTab || "search");
     } finally {
+      clearTimeout(timeoutId);
       setScanActive(false);
     }
   };
@@ -293,25 +367,52 @@ export default function App() {
     setReportData(null);
     setFormattedReport("");
 
-    // Switch to viewer immediately to show loader
+    const playerToSend = analysisPlayer.trim();
+    const reportToSend = displayReportName(selectedReport);
+
     setPrevTab(activeTab);
     setActiveTab("viewer");
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 125000);
+
     try {
+      console.log("Generando Reporte 41:", { player: playerToSend, report: reportToSend });
       const response = await fetch("https://n8n.glovall.app/webhook/savant-41report", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json, text/plain, */*"
+        },
         body: JSON.stringify({ 
-          playerName: analysisPlayer, 
-          reportType: displayReportName(selectedReport) 
-        })
+          playerName: playerToSend, 
+          reportType: reportToSend 
+        }),
+        signal: controller.signal
       });
+
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+
       const data = await response.text();
+      if (!data) throw new Error("Respuesta vacía del servidor");
       setReportData(data);
-    } catch (error) {
-      Swal.fire("Error", "Error al generar el reporte analítico.", "error");
+    } catch (error: any) {
+      console.error("Analysis error:", error);
+      const message = error.name === 'AbortError' 
+        ? "La generación del reporte 41 ha excedido el tiempo de espera. Por favor, intenta de nuevo."
+        : "Error al generar el reporte analítico especializado.";
+
+      Swal.fire({
+        title: "Error de Reporte",
+        text: message,
+        icon: "error",
+        confirmButtonColor: "#3b82f6"
+      });
       setActiveTab(prevTab || "analysis");
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
